@@ -22,7 +22,7 @@ API contains `ItemActions` and `UserActions` classes from several Osclass versio
 
 All the hooks and filters are prefixed by `api_`, so no plugins interfer with API by default.
 
-If you still with to use default action classes, replace `use \DFTDAPI\Actions\UserActions as UserActions;` with `UserActions`, same for item.
+If you still with to use default action classes, replace `use \DFTDAPI\Actions\UserActions as UserActions;` with `use UserActions`, same for item.
 
 ## Plugins
 
