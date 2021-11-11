@@ -18,7 +18,7 @@ Check `api/index.php`.
 
 ## ItemActions / UserActions
 
-API contains `ItemActions` and `UserActions` classes from several Osclass differences, with defined namespace and modified hooks.
+API contains `ItemActions` and `UserActions` classes from several Osclass versions, with defined namespace and modified hooks.
 
 All the hooks and filters are prefixed by `api_`, so no plugins interfer with API by default.
 
