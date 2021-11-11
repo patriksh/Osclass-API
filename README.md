@@ -22,7 +22,7 @@ API contains `ItemActions` and `UserActions` classes from several Osclass versio
 
 All the hooks and filters are prefixed by `api_`, so no plugins interfer with API by default.
 
-If you still with to use default action classes, replace `use \DFTDAPI\Actions\UserActions as UserActions;` with `use UserActions`, same for item.
+If you still with to use default action classes, replace `use \DFTDAPI\Actions\UserActions as UserActions;` with `use UserActions;`, same for item.
 
 ## Plugins
 
@@ -31,9 +31,10 @@ Easily extendable using the simple `api_router` hook.
 Example:
 
 ```php
-osc_add_hook('api_router', function($router) {
+function my_api_extension($router) {
     $router->get('/hello-world', function() {
         echo 'Hello world!';
     });
-});
+}
+osc_add_hook('api_router', 'my_api_extension');
 ```
