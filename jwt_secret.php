@@ -1,1 +1,0 @@
-<?php define('DFTDAPI_JWT_SECRET', '16909b3abd28d37e72b4228a7d143a0d');
