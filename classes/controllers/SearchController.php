@@ -13,7 +13,6 @@ use ItemResource;
 use LatestSearches;
 use Params;
 
-
 class SearchController extends Controller {
     public $searchDAO;
 
@@ -25,10 +24,18 @@ class SearchController extends Controller {
     }
 
     public function search() {
-        if(Params::getParam('category') != '') $this->searchDAO->addCategory(Params::getParam('category'));
-        if(Params::getParam('user') != '') $this->searchDAO->fromUser(Params::getParam('user'));
-        if(Params::getParam('withPicture') != '') $this->searchDAO->withPicture((bool) Params::getParam('withPicture'));
-        if(Params::getParam('premium') != '') $this->searchDAO->onlyPremium((bool) Params::getParam('premium'));
+        $category = Params::getParam('category');
+        if($category != '') $this->searchDAO->addCategory($category);
+
+        $user = Params::getParam('user');
+        if($user != '') $this->searchDAO->fromUser($user);
+
+        $withPicture = Params::getParam('withPicture');
+        if(Params::getParam('withPicture') != '') $this->searchDAO->withPicture((bool) $withPicture);
+
+        $onlyPremium = Params::getParam('premium');
+        if(Params::getParam('premium') != '') $this->searchDAO->onlyPremium((bool) $onlyPremium);
+
         $this->searchDAO->addCityArea(Params::getParam('cityArea'));
         $this->searchDAO->addCity(Params::getParam('cityId'));
         $this->searchDAO->addRegion(Params::getParam('regionId'));
@@ -39,9 +46,14 @@ class SearchController extends Controller {
         $allowedColumnsForSorting = Search::getAllowedColumnsForSorting();
         $allowedTypesForSorting = Search::getAllowedTypesForSorting();
 
-        $order = in_array(Params::getParam('order'), $allowedColumnsForSorting) ? Params::getParam('order') : osc_default_order_field_at_search(); 
-        $orderType = in_array(Params::getParam('orderType'), $allowedTypesForSorting) ? Params::getParam('orderType') : osc_default_order_type_at_search(); 
-        $page = ((int) Params::getParam('iPage')) ? (int) Params::getParam('iPage') - 1 : 0;
+        $order = Params::getParam('order');
+        $order = in_array($order, $allowedColumnsForSorting) ? $order : osc_default_order_field_at_search(); 
+        
+        $orderType = Params::getParam('orderType');
+        $orderType = in_array($orderType, $allowedTypesForSorting) ? $orderType : osc_default_order_type_at_search(); 
+
+        $page = (int) Params::getParam('iPage');
+        $page = ($page) ? $page - 1 : 0;
 
         $perPage = intval(Params::getParam('pagesize'));
         if($perPage > 0) {
@@ -51,9 +63,7 @@ class SearchController extends Controller {
         }
 
         $pattern = trim(strip_tags(Params::getParam('pattern')));
-        if($pattern != '') {
-            $this->searchDAO->addPattern($pattern);
-        }
+        if($pattern != '') $this->searchDAO->addPattern($pattern);
 
         $this->searchDAO->order($order, $orderType);
         $this->searchDAO->page($page, $perPage);
