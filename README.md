@@ -4,13 +4,9 @@ Osclass API plugin, with all the required endpoints and JWT auth.
 
 ## Osclass App (Native + PWA)
 
-You always wanted a mobile app for Osclass, didn't you? Well, you can get one now.
+You always wanted a mobile app for Osclass, didn't you? Well, you can get one now, and it's built with this very API!
 
-Check the demo: https://pwa.osclass.app
-
-Osclass App will soon be available for sale on its official website. You, the reader of this message can get it early, and for a special discount!
-
-Contact me at info[at]defected.dev for more info.
+Check it **now** at https://osclass.app
 
 ## Usage
 
