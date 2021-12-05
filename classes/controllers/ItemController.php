@@ -307,7 +307,7 @@ class ItemController extends Controller {
         $otherName = str_replace('auto_', '', $name); // Why aren't "auto_" images deleted by default in Osclass??
 
         // Confirm file that's requested to be deleted starts with same IP.
-        $search = 'auto_' . request()->ip() . '_apifile_';
+        $search = 'auto_' . Params::getServerParam('REMOTE_ADDR') . '_apifile_';
         if(substr($name, 0, strlen($search)) === $search) {
             @unlink(osc_content_path() . 'uploads/temp/' . $name);
             @unlink(osc_content_path() . 'uploads/temp/' . $otherName);
