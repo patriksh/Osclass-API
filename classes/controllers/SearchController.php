@@ -162,6 +162,7 @@ class SearchController extends Controller {
         }
         
         $aItems = osc_apply_filter('pre_show_items', $aItems);
+        $aItems = osc_apply_filter('api_pre_show_items', $aItems, 'search');
 
         osc_run_hook('api_search', $this->searchDAO);
 
@@ -196,6 +197,8 @@ class SearchController extends Controller {
             $items[$index]['resources'] = $this->itemResourceDAO->getAllResourcesFromItem($item['pk_i_id']);
         }
 
+        $items = osc_apply_filter('api_pre_show_items', $items, 'premium');
+
         return $this->json($items);
     }
 
@@ -206,6 +209,8 @@ class SearchController extends Controller {
             unset($items[$index]['s_secret']);
             $items[$index]['resources'] = $this->itemResourceDAO->getAllResourcesFromItem($item['pk_i_id']);
         }
+
+        $items = osc_apply_filter('api_pre_show_items', $items, 'latest');
 
         return $this->json($items);
     }
@@ -228,6 +233,8 @@ class SearchController extends Controller {
             unset($items[$index]['s_secret']);
             $items[$index]['resources'] = $this->itemResourceDAO->getAllResourcesFromItem($item['pk_i_id']);
         }
+
+        $items = osc_apply_filter('api_pre_show_items', $items, 'similar');
 
         return $this->json($items);
     }

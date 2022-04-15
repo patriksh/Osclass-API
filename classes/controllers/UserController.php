@@ -186,6 +186,8 @@ class UserController extends Controller {
             $items[$key]['resources'] = ItemResource::newInstance()->getAllResourcesFromItem($item['pk_i_id']);
         }
 
+        $items = osc_apply_filter('api_pre_show_items', $items, 'user');
+
         return $this->json(['items' => $items, 'total' => $totalItems]);
     }
 
