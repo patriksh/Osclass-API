@@ -262,11 +262,7 @@ class ItemController extends Controller {
         $mItems = new ItemActions(false);
         $success = $mItems->mark($id, $as);
 
-        if($success) {
-            return $this->json(['status' => 1, 'message' => _m('Thanks! That\'s very helpful')]);
-        } else {
-            return $this->json(['status' => 0, 'message' => _m('Failed to report the item')]);
-        }
+        return $this->json(['status' => 1, 'message' => _m('Thanks! That\'s very helpful')]);
     }
 
     public function imageUpload() {
