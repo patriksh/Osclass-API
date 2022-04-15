@@ -76,8 +76,9 @@ class DFTDAPI_API {
             $router->post('refresh', 'UserController@refresh');
 
             $router->post('/', 'UserController@add');
-            $router->post('/forgot', 'UserController@forgotPassword');
-            $router->post('/reset', 'UserController@resetPassword');
+            $router->post('validate', 'UserController@validate');
+            $router->post('forgot', 'UserController@forgotPassword');
+            $router->post('reset', 'UserController@resetPassword');
             $router->get('items', 'UserController@items');
             $router->get('my-items', 'UserController@myItems');
             $router->get('item-count/{type}', 'UserController@itemCount');

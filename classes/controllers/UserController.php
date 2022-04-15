@@ -17,6 +17,10 @@ use Page;
 use Params;
 
 class UserController extends Controller {
+    const ACCESS_TOKEN_DURATION = 3600; // 60 minutes
+    const REFRESH_TOKEN_DURATION = 30 * 86400; // 30 days
+    const REFRESH_TOKEN_DURATION_REMEMBER_ME = 365 * 86400; // 365 days
+
     public $userDAO;
     public $refreshTokenDAO;
 
@@ -33,7 +37,6 @@ class UserController extends Controller {
 
         $email = trim(Params::getParam('email'));
         $password = Params::getParam('password');
-        $rememberMe = (bool) Params::getParam('rememberMe');
 
         if($email == '') $this->abort(400, _m('Please provide an email address'));
         if($password == '') $this->abort(400, _m('Empty passwords are not allowed. Please provide a password'));
@@ -61,11 +64,18 @@ class UserController extends Controller {
         if(!$user['b_active']) $this->abort(400, _m('The user has not been validated yet'));
         if(!$user['b_enabled']) $this->abort(400, _m('The user has been suspended'));
 
-        // Generate and save the refresh token.
         $time = time();
-        $refreshDuration = ($rememberMe) ? 365 * 86400 : 30 * 86400; // 1 year / 1 month.
+        $refreshToken = $this->refreshToken($time, $user);
+        $accessToken = $this->accessToken($time, $user);
+        
+        return $this->json(['status' => 1, 'refresh_token' => $refreshToken, 'access_token' => $accessToken]);
+    }
+
+    private function refreshToken($time, $user) {
+        $refreshDuration = (Params::getParam('rememberMe')) ? self::REFRESH_TOKEN_DURATION_REMEMBER_ME : self::REFRESH_TOKEN_DURATION;
         $refreshSecret = osc_genRandomPassword(32);
-        $refreshToken = DFTDAPI_JWT::generate([
+        
+        $refreshToken = JWT::generate([
             'iss' => osc_base_url(),
             'iat' => $time,
             'nbf' => $time,
@@ -73,6 +83,7 @@ class UserController extends Controller {
             'sub' => $user['pk_i_id'],
             'jti' => $refreshSecret,
         ]);
+
         $this->refreshTokenDAO->insert([
             'fk_i_user_id' => $user['pk_i_id'],
             's_token' => osc_hash_password($refreshToken),
@@ -80,17 +91,20 @@ class UserController extends Controller {
             'dt_expires' => date('Y-m-d H:i:s', $time + $refreshDuration),
         ]);
 
-        // Generate the access token.
-        $accessToken = DFTDAPI_JWT::generate([
+        return $refreshToken;
+    }
+
+    private function accessToken($time, $user) {
+        $accessToken = JWT::generate([
             'iss' => osc_base_url(),
             'iat' => $time,
             'nbf' => $time,
-            'exp' => $time + 3600, // 1 hour.
+            'exp' => $time + self::ACCESS_TOKEN_DURATION,
             'sub' => $user['pk_i_id'],
             'name' => $user['s_name'],
         ]);
-        
-        return $this->json(['refresh_token' => $refreshToken, 'access_token' => $accessToken]);
+
+        return $accessToken;
     }
 
     public function logout() {
@@ -102,7 +116,7 @@ class UserController extends Controller {
 
         $this->refreshTokenDAO->deleteByUserSecret($refreshParsed->sub, $refreshParsed->jti);
     
-        return $this->json(1);
+        return $this->json(['status' => 1]);
     }
 
     public function refresh() {
@@ -132,12 +146,12 @@ class UserController extends Controller {
             'iss' => osc_base_url(),
             'iat' => $time,
             'nbf' => $time,
-            'exp' => $time + 3600, // 1 hour.
+            'exp' => $time + self::ACCESS_TOKEN_DURATION,
             'sub' => $user['pk_i_id'],
             'name' => $user['s_name'],
         ]);
         
-        return $this->json(['access_token' => $accessToken]);
+        return $this->json(['status' => 1, 'access_token' => $accessToken]);
     }
 
     public function view(int $id) {
@@ -333,6 +347,31 @@ class UserController extends Controller {
         $this->refreshTokenDAO->delete(['fk_i_user_id' => $user['pk_i_id']]);
 
         return $this->json(['status' => 1, 'message' => _m('The password has been changed')]);
+    }
+
+    public function validate() {
+        // Get user by email and secret.
+        $this->userDAO->dao->select();
+        $this->userDAO->dao->from($this->userDAO->getTableName());
+        $this->userDAO->dao->where('s_email', Params::getParam('email'));
+        $this->userDAO->dao->where('s_secret', Params::getParam('code'));
+        $this->userDAO->dao->where('b_active', '0');
+        $result = $this->userDAO->dao->get();
+    
+        if(!$result) $this->abort(400, _m('Invalid credentials'));
+        $user = $result->row();
+        if(!count($user)) $this->abort(400, _m('Invalid credentials'));
+
+        $this->userDAO->updateByPrimaryKey(['b_active' => 1], $user['pk_i_id']);
+
+        osc_run_hook('hook_email_user_registration', $user);
+        osc_run_hook('api_validate_user', $user);
+
+        $time = time();
+        $refreshToken = $this->refreshToken($time, $user);
+        $accessToken = $this->accessToken($time, $user);
+
+        return $this->json(['status' => 1, 'refresh_token' => $refreshToken, 'access_token' => $accessToken]);
     }
 
     public function forgotPassword() {
