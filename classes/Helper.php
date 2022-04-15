@@ -18,9 +18,15 @@ class DFTDAPI_Helper {
     }
 
     public static function getOsclassVersion() {
-        $supported = [390, 440, 502, 800];
+        $supported = [390, 440, 510, 800];
         $default = 390;
         $version = intval(str_replace('.', '', OSCLASS_VERSION));
+
+        // Use 5.1.0 for future Mindstellar updates.
+        if($version >= 500 && $version <= 599) $version = 510;
+
+        // Use 8.0.0 for future Osclasspoint updates.
+        if($version >= 800 && $version <= 899) $version = 800;
 
         return (in_array($version, $supported)) ? $version : $default;
     }
